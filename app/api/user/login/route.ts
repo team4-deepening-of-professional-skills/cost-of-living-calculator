@@ -35,7 +35,8 @@ export async function POST(request: Request) {
     // 3. Return success and the account ID (user.id)
     return NextResponse.json({
       success: true,
-      accountNo: user.id 
+      accountNo: user.id,
+      username: user.username
     });
 
   } catch (error) {
