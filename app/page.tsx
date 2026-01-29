@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
+import { CHART_COLORS } from "@/components/ui/theme";
 
 interface Expense {
   name: string;
@@ -54,14 +56,7 @@ export default function Dashboard() {
     const total = expenses.reduce((sum, item) => sum + item.amount, 0);
 
     let currentAngle = 0;
-    const colors = [
-      "#3b82f6",
-      "#ef4444",
-      "#10b981",
-      "#f59e0b",
-      "#8b5cf6",
-      "#ec4899",
-    ];
+    const colors = CHART_COLORS;
 
     const segments = expenses.map((item, index) => {
       const percentage = (item.amount / total) * 100;
@@ -81,46 +76,43 @@ export default function Dashboard() {
 
   if (!username) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#191724] via-[#1f1d2e] to-[#26233a] text-[#e0def4]">
         Loading...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-rp-base via-rp-surface to-rp-overlay px-4 py-10 text-soft">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between bg-white p-6 rounded-lg shadow-sm mb-8">
+        <div className="flex items-center justify-between bg-rp-surface/80 border border-rp-border p-6 rounded-2xl shadow-lg shadow-black/30 mb-8 backdrop-blur">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
-            <p className="text-gray-500">Welcome back, {username}</p>
+            <h1 className="text-2xl font-semibold text-soft">Dashboard</h1>
+            <p className="text-sm text-subtle">Welcome back, {username}</p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="bg-red-50 text-red-600 px-4 py-2 rounded-md hover:bg-red-100 transition text-sm font-medium"
-          >
+          <Button onClick={handleLogout} variant="ghost" size="sm" className="uppercase tracking-wide">
             Sign Out
-          </button>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center">
-            <h2 className="text-lg font-semibold text-gray-800 mb-6 w-full text-left">
+          <div className="bg-rp-surface/80 border border-rp-border p-6 rounded-2xl shadow-lg shadow-black/30 flex flex-col items-center transition-transform duration-200 ease-out hover:-translate-y-1 hover:scale-[1.02]">
+            <h2 className="text-lg font-semibold text-soft mb-6 w-full text-left">
               Spending Breakdown
             </h2>
 
             {loadingData ? (
-              <p className="text-gray-400">Loading chart...</p>
+              <p className="text-sm text-muted">Loading chart...</p>
             ) : expenses.length === 0 ? (
-              <p className="text-gray-400">No data to display</p>
+              <p className="text-sm text-muted">No data to display</p>
             ) : (
               <div className="flex flex-col items-center">
                 <div
-                  className="w-48 h-48 rounded-full mb-6 relative"
+                  className="w-48 h-48 rounded-full mb-6 relative shadow-inner shadow-black/40"
                   style={{ background: chartData.gradient }}
                 >
-                  <div className="absolute inset-0 m-auto w-32 h-32 bg-white rounded-full flex items-center justify-center">
-                    <span className="text-lg font-bold text-gray-700">
+                  <div className="absolute inset-0 m-auto w-32 h-32 bg-rp-base border border-rp-border rounded-full flex items-center justify-center">
+                    <span className="text-lg font-semibold text-soft">
                       €{chartData.total}
                     </span>
                   </div>
@@ -137,9 +129,9 @@ export default function Dashboard() {
                           className="w-3 h-3 rounded-full mr-2"
                           style={{ backgroundColor: item.color }}
                         ></span>
-                        <span className="text-gray-600">{item.name}</span>
+                        <span className="text-soft">{item.name}</span>
                       </div>
-                      <span className="font-medium text-gray-900">
+                      <span className="font-medium text-soft">
                         €{item.amount}
                       </span>
                     </div>
@@ -149,38 +141,38 @@ export default function Dashboard() {
             )}
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
+          <div className="bg-rp-surface/80 border border-rp-border p-6 rounded-2xl shadow-lg shadow-black/30 transition-transform duration-200 ease-out hover:-translate-y-1 hover:scale-[1.02]">
+            <h2 className="text-lg font-semibold text-soft mb-4">
               Detailed List
             </h2>
 
             {loadingData ? (
-              <p className="text-gray-400">Loading list...</p>
+              <p className="text-sm text-muted">Loading list...</p>
             ) : expenses.length === 0 ? (
-              <p className="text-gray-400">No expenses found.</p>
+              <p className="text-sm text-muted">No expenses found.</p>
             ) : (
-              <div className="overflow-hidden rounded-lg border border-gray-200">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+              <div className="overflow-hidden rounded-2xl border border-rp-border bg-rp-surface/80 shadow-lg shadow-black/30">
+                <table className="min-w-full divide-y divide-rp-border text-sm">
+                  <thead className="bg-rp-overlay">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-subtle uppercase tracking-wider">
                         Item
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-right text-xs font-medium text-subtle uppercase tracking-wider">
                         Cost
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-transparent divide-y divide-rp-border">
                     {expenses.map((expense, index) => (
                       <tr key={index}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-soft">
                           {expense.name}
-                          <div className="text-xs text-gray-400 font-normal">
+                          <div className="text-xs text-muted font-normal">
                             {new Date(expense.date).toLocaleDateString("en-GB")}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 font-bold">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-soft font-semibold">
                           €{expense.amount}
                         </td>
                       </tr>

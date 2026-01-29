@@ -10,6 +10,20 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Ros9 Pine inspired palette */
+  --color-rp-base: #191724;
+  --color-rp-surface: #1f1d2e;
+  --color-rp-overlay: #26233a;
+  --color-rp-border: #2a273f;
+
+  --color-muted: #6e6a86;
+  --color-subtle: #908caa;
+  --color-soft: #e0def4;
+
+  --color-love: #eb6f92;
+  --color-gold: #f6c177;
+  --color-foam: #9ccfd8;
 }
 
 @media (prefers-color-scheme: dark) {
