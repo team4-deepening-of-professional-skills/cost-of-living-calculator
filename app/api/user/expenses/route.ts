@@ -12,12 +12,17 @@ async function connectToMongo() {
   return mongoClient;
 }
 
+
+//post
 export async function POST(request: Request) {
   try {
-    const { accountNo, expenseName, amount, date } = await request.json();
 
-    if (!accountNo || !expenseName || !amount ) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    const body = await request.json();
+    console.log("POST payload:", body);
+    const { accountNo, id, category, description, amount, date } = body;
+
+    if (!accountNo || !id || !category || !description || !amount == null) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
     const client = await connectToMongo();
@@ -26,13 +31,16 @@ export async function POST(request: Request) {
 
 
 const result = await collection.updateOne(
-  { id: accountNo }, 
+  { id: Number(accountNo) }, 
   { 
     $push: { 
       expenses: { 
-        name: expenseName, 
+        id,
+        category,
+        description,
         amount: amount, 
-        date: date
+        date: date ?? Date.now(),
+        createdAt: Date.now()
       } 
     } 
   } as any 
@@ -47,5 +55,49 @@ const result = await collection.updateOne(
   } catch (error) {
     console.error("Database error:", error);
     return NextResponse.json({ error: "Failed to add expense" }, { status: 500 });
+  }
+}
+
+
+// get
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const accountNo = searchParams.get("accountNo");
+
+    if (!accountNo) {
+      return NextResponse.json(
+        { error: "Missing accountNo" },
+        { status: 400 }
+      );
+    }
+
+    const client = await connectToMongo();
+    const db = client.db("cost-of-living-calculator");
+    const collection = db.collection("user");
+
+    const user = await collection.findOne(
+      { id: Number(accountNo) },
+      { projection: { expenses: 1, _id: 0 } }
+    );
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      expenses: user.expenses ?? [],
+    });
+
+  } catch (error) {
+    console.error("GET expenses error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch expenses" },
+      { status: 500 }
+    );
   }
 }
