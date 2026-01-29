@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
 
 export default function LoginPage() {
   const [username, setUsername] = useState("");
@@ -31,50 +32,50 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg">
-        <h1 className="text-2xl font-bold mb-6 text-center text-black">
-          Login
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-rp-base via-rp-surface to-rp-overlay text-soft px-4">
+      <div className="w-full max-w-md bg-rp-surface/90 border border-rp-border p-8 rounded-2xl shadow-xl shadow-black/40 backdrop-blur">
+        <h1 className="text-2xl font-semibold mb-2 text-center text-soft">
+          Sign in
         </h1>
+        <p className="mb-8 text-center text-sm text-subtle">
+          Continue to your cost-of-living dashboard.
+        </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {error && (
-            <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm text-center">
+            <div className="p-3 bg-love/10 border border-love/40 text-love rounded-md text-sm text-center">
               {error}
             </div>
           )}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-soft">
               Username
             </label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black"
+              className="mt-1 block w-full rounded-md border border-rp-border bg-rp-overlay px-3 py-2 text-sm text-soft placeholder-muted focus:outline-none focus:ring-2 focus:ring-foam focus:border-foam"
               required
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-soft">
               Password
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black"
+              className="mt-1 block w-full rounded-md border border-rp-border bg-rp-overlay px-3 py-2 text-sm text-soft placeholder-muted focus:outline-none focus:ring-2 focus:ring-foam focus:border-foam"
               required
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
-          >
+          <Button type="submit" className="w-full">
             Sign In
-          </button>
+          </Button>
         </form>
       </div>
     </div>
