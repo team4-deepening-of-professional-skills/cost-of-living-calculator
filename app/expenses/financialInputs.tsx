@@ -21,6 +21,7 @@ export type Entry = {
   id: string
   category: string
   description: string
+  merchant: string
   amount: number
   createdAt: number
   recurring?: RecurringRule
@@ -40,11 +41,12 @@ export default function FinancialInput() {
   const [amount, setAmount] = useState("")
   const [category, setCategory] = useState("")
   const [description, setDescription] = useState("")
+  const [merchant, setMerchant] = useState("")
   const [entries, setEntries] = useState<Entry[]>([])
   const [isRecurring, setIsRecurring] = useState(false)
   const [every, setEvery] = useState(1)
   const [interval, setInterval] = useState<"days" | "weeks" | "months">("months")
-  const [setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
 
 // load expenses
@@ -75,13 +77,14 @@ useEffect(() => {
 
 // post entries
   async function handleAddEntry() {
-    if (!amount || !category || !description) return
+    if (!amount || !category || !description || !merchant) return
 
 
     const newEntry: Entry ={
         id: crypto.randomUUID(),
         category,
         description,
+        merchant,
         amount: Number(amount),
         createdAt: Date.now(),
         ...(isRecurring && {
@@ -105,6 +108,7 @@ useEffect(() => {
             id: newEntry.id,
             category: newEntry.category,
             description: newEntry.description,
+            merchant: newEntry.merchant,
             amount: newEntry.amount,
             date: newEntry.createdAt
           })
@@ -125,20 +129,46 @@ useEffect(() => {
     setAmount("")
     setCategory("")
     setDescription("")
+    setMerchant("")
     setIsRecurring(false)
     setEvery(1)
     setInterval("months")
   }
 
-  function handleDeleteEntry(id: string) {
-    setEntries((prev) => prev.filter((e) => e.id !== id))
+  //delete
+  async function handleDeleteEntry(id: string) {
+    const accountNo = localStorage.getItem("userId")
+    if (!accountNo) return;
+
+    try {
+      const res = await fetch("/api/user/expenses", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accountNo,
+          expenseId: id
+        })
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        alert("Delete failed" + data.error)
+        return
+      }
+
+      setEntries((prev) => prev.filter((e) => e.id !==id))
+
+    } catch (err){
+      console.error("Expense delete failed", err)
+    }
   }
 
 
   return (
     <div className="space-y-6 max-w-lg"> 
-      {/* Input */} 
       <div className="space-y-2 border p-4 rounded"> 
+
+        {/* Input */} 
         <input 
           type="number"
           value={amount}
@@ -147,7 +177,7 @@ useEffect(() => {
           className="border p-2 w-full"
         />
 
-
+        {/* description */} 
         <input
           type="text"
           value={description}
@@ -157,7 +187,8 @@ useEffect(() => {
         />
 
 
-        <select //select category for input
+        {/*choose category*/}
+        <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           className="border p-2 w-full"
@@ -170,6 +201,16 @@ useEffect(() => {
           ))}
         </select>
         
+
+        {/*merchant or vendor*/}
+        <input
+          type="text"
+          value={merchant}
+          onChange={(e) => setMerchant(e.target.value)}
+          placeholder="Merchant"
+          className="border p-2 w-full"
+        />
+
 
         {/* recurring button*/ }
         <label className="flex items-center gap-2 text-sm">
@@ -209,9 +250,9 @@ useEffect(() => {
           </div>
         )}
         
-
+        {/* Save button */} 
         <button
-          onClick={handleAddEntry} //save button
+          onClick={handleAddEntry}
           disabled={!amount || !category}
           className="bg-black text-white px-4 py-2 disabled:opacity-40"
         >
@@ -225,7 +266,7 @@ useEffect(() => {
 
 
       {/* Overview by category*/}
-      <EntriesByCategory entries={entries} />
+      <EntriesByCategory entries={entries} onDelete={handleDeleteEntry} />
     </div>
   )
 }

@@ -19,9 +19,9 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     console.log("POST payload:", body);
-    const { accountNo, id, category, description, amount, date } = body;
+    const { accountNo, id, category, description, merchant, amount, date } = body;
 
-    if (!accountNo || !id || !category || !description || !amount == null) {
+    if (!accountNo || !id || !category || !description || !merchant || !amount == null) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
@@ -38,6 +38,7 @@ const result = await collection.updateOne(
         id,
         category,
         description,
+        merchant,
         amount: amount, 
         date: date ?? Date.now(),
         createdAt: Date.now()
@@ -55,6 +56,43 @@ const result = await collection.updateOne(
   } catch (error) {
     console.error("Database error:", error);
     return NextResponse.json({ error: "Failed to add expense" }, { status: 500 });
+  }
+}
+
+
+//postus deletus
+export async function DELETE(request: Request){
+  try{
+    const { accountNo, expenseId}  = await request.json ();
+
+    if ( !accountNo || !expenseId ) {
+      return NextResponse.json(
+        { error: "Missing account or expense id"},
+        { status: 400 },
+      )
+    }
+
+    const client = await connectToMongo();
+    const db = client.db("cost-of-living-calculator");
+    const collection = db.collection("user");
+
+    const result = await collection.updateOne(
+      { id: Number(accountNo) },
+      { 
+        $pull :{
+        expenses: { id: expenseId }
+      }
+      }as any 
+    );
+
+    if (result.matchedCount === 0){
+      return NextResponse.json({error: "User not fonud" }, {status: 400})
+    }
+    return NextResponse.json({ success: true });
+
+  } catch (error){
+    console.error("Error deleting", error)
+    return NextResponse.json({error: "Failed to delete expense"}, {status: 500})
   }
 }
 
