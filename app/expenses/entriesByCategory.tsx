@@ -20,10 +20,11 @@ type Category = {
 
 type Props = {
   entries: Entry[]
+  onDelete: (id: string) => void;
 }
 
 // sort the entries by category (need to add some time limit (like show for 30 days max??))..
-export default function EntriesByCategory({ entries }: Props) {
+export default function EntriesByCategory({ entries, onDelete }: Props) {
   return (
     <div className="grid gap-4">
       {CATEGORIES.map((category) => {
@@ -44,7 +45,7 @@ export default function EntriesByCategory({ entries }: Props) {
             {/* Header */}
             <div className="flex justify-between font-semibold">
               <span>{category.label}</span>
-              <span>{total}</span>
+              <span>{total.toFixed(2)} €</span>
             </div>
 
             <hr />
@@ -58,14 +59,37 @@ export default function EntriesByCategory({ entries }: Props) {
                 {categoryEntries.map((entry) => (
                   <div
                     key={entry.id}
-                    className="flex justify-between items-center"
+                    className="flex justify-between items-center py-2 border-b last:border-b-0"
                   >
                     <div className="flex flex-col">
-                      <span>{entry.amount}€ {entry.description}</span>
+                       {/* amount */}
+                      <span className="font-semibold">
+                        {entry.amount.toFixed(2)} €
+                      </span>
+
+                      {/* merch*/}
+                      <span className="font-medium">
+                        {entry.merchant}
+                      </span>
+
+                      {/* description */}
+                      <span className="text-sm text-gray-600">
+                        "{entry.description}"
+                      </span>
+
+                      {/* time */}
                       <span className="text-xs text-gray-500">
                         {new Date(entry.createdAt).toLocaleDateString("en-GB")}
                       </span>
                     </div>
+
+                      {/* Delete Button */}
+                      <button
+                        onClick={() => onDelete(entry.id)}
+                        className="bg-brand box-border border rounded-base px-2 text-sm">
+                        Delete
+                      </button>
+
                   </div>
                 ))}
               </div>

@@ -18,34 +18,46 @@ export default function EntryList({ entries, onDelete }: Props){
                 <p className="text-sm text-gray-500">No history yet</p>
             )}
 
+            {/* Entry info */}
             {entries.map((entry) => (
                 <div
-                key={entry.id}
-                className="flex justify between text-sm py-1"
+                    key={entry.id}
+                    className="flex justify-between items-center py-2 border-b last:border-b-0"
                 >
-
-                {/* Entry Info */}
                 <div className="flex flex-col">
-                <span>
-                    {entry.category} {entry.amount} €
-                </span>
-                <span className="text-xs text-gray-500">
-                    {new Date(entry.createdAt).toLocaleDateString("en-GB")}
-                </span>
-                </div>
-                
+                        {/* amount */}
+                      <span className="font-semibold">
+                        {entry.amount.toFixed(2)} €
+                      </span>
 
+                    <div className="flex flex-col">
+                    {/* category */}
+                    <span className="font-semibold">
+                        {entry.category}
+                    </span>
+                    {/* merchant */}
+                    <span className="font-medium">
+                        {entry.merchant}
+                    </span>
+                {/* description */}
+                    <span className="text-sm text-gray-600">
+                        "{entry.description}"
+                    </span>
+                {/* timestamp */}
+                    <span className="text-xs text-gray-500">
+                        {new Date(entry.createdAt).toLocaleDateString("en-GB")}
+                    </span>
+                    </div>
+
+
+                </div>
                 {/* Delete Button */}
-                <div className="flex items-center gap-2">
-                      <button
+                    <button
                         onClick={() => onDelete(entry.id)}
-                        className="border p-1 rounded hover:bg-gray-100 text-sm"
-                        >                   
+                        className="bg-brand box-border border rounded-base px-2 text-sm">
                         Delete
-                      </button>
+                    </button>
                 </div>
-
-            </div>
             ))}
         </div>
     )
