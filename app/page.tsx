@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { CHART_COLORS } from "@/components/ui/theme";
+import { SpendingTipsModal, TipsResponse } from "@/components/SpendingTipsModal";
 
 interface Expense {
   merchant: string;
@@ -16,6 +17,11 @@ export default function Dashboard() {
   const [username, setUsername] = useState<string | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loadingData, setLoadingData] = useState(false);
+  const [tipsLoadingCategory, setTipsLoadingCategory] = useState<string | null>(null);
+  const [tipsError, setTipsError] = useState<string | null>(null);
+  const [tipsData, setTipsData] = useState<TipsResponse | null>(null);
+  const [isTipsModalOpen, setIsTipsModalOpen] = useState(false);
+  const [tipsCategory, setTipsCategory] = useState<string | null>(null);
   const [dateFilter, setDateFilter] = useState({
     from: new Date(new Date().setMonth(new Date().getMonth() - 1))
       .toISOString()
@@ -73,6 +79,45 @@ export default function Dashboard() {
       from: pastDate.toISOString().split("T")[0],
       to: today.toISOString().split("T")[0],
     });
+  };
+
+  const handleTipsRequest = async (category: string) => {
+    setTipsCategory(category);
+    setTipsLoadingCategory(category);
+    setTipsError(null);
+    setTipsData(null);
+    setIsTipsModalOpen(true);
+
+    const categoryExpenses = filteredExpenses.filter(
+      (expense) => expense.category === category,
+    );
+
+    try {
+      const res = await fetch("/api/gemini", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category,
+          expenses: categoryExpenses,
+          from: dateFilter.from,
+          to: dateFilter.to,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to generate tips");
+      }
+
+      const data = await res.json();
+      const parsed = JSON.parse(data.output) as TipsResponse;
+      setTipsData(parsed);
+    } catch (error) {
+      setTipsError(
+        error instanceof Error ? error.message : "Unexpected response format",
+      );
+    } finally {
+      setTipsLoadingCategory(null);
+    }
   };
 
   const filteredExpenses = useMemo(() => {
@@ -285,7 +330,7 @@ export default function Dashboard() {
                         key={index}
                         className="flex items-center justify-between text-sm"
                       >
-                        <div className="flex items-center">
+                        <div className="flex items-center gap-2">
                           <span
                             className="w-3 h-3 rounded-full mr-2"
                             style={{ backgroundColor: item.color }}
@@ -293,6 +338,36 @@ export default function Dashboard() {
                           <span className="text-soft capitalize">
                             {item.name.replace(/_/g, " ")}
                           </span>
+                          <button
+                            type="button"
+                            onClick={() => handleTipsRequest(item.name)}
+                            className="group inline-flex h-6 w-6 items-center justify-center text-subtle transition hover:text-white hover:drop-shadow-[0_0_8px_rgba(196,167,231,0.8)] disabled:opacity-40 disabled:cursor-not-allowed"
+                            disabled={
+                              tipsLoadingCategory !== null &&
+                              tipsLoadingCategory !== item.name
+                            }
+                            aria-label={`Get AI tips for ${item.name}`}
+                            title="Get AI tips"
+                          >
+                            {tipsLoadingCategory === item.name ? (
+                              <span className="inline-block h-4 w-4 rounded-full border-2 border-rp-border border-t-rp-iris animate-spin" />
+                            ) : (
+                              <svg
+                                viewBox="0 0 24 24"
+                                className="h-5 w-5"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.8"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                aria-hidden="true"
+                              >
+                                <path d="M12 3l1.6 3.9L18 8.5l-3.9 1.6L12 14l-1.6-3.9L6.5 8.5l3.9-1.6L12 3z" />
+                                <path d="M6.5 14.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9.9-2.1z" />
+                                <path d="M17 15l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7.7-1.6z" />
+                              </svg>
+                            )}
+                          </button>
                         </div>
                         <span className="font-medium text-soft">
                           € {item.amount.toFixed(2).replace('.', ',')}
@@ -357,6 +432,18 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      <SpendingTipsModal
+        isOpen={isTipsModalOpen}
+        isLoading={tipsLoadingCategory !== null}
+        error={tipsError}
+        data={tipsData}
+        category={tipsCategory}
+        onClose={() => {
+          setIsTipsModalOpen(false);
+          setTipsCategory(null);
+        }}
+      />
     </div>
   );
 }
