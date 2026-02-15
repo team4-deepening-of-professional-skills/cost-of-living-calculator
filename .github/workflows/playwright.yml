@@ -20,6 +20,7 @@ jobs:
     - name: Build Next.js app
       env:
         BASE_URL: ${{ secrets.BASE_URL }}
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
       run: npm run build
 
     - name: Install Playwright Browsers
@@ -28,6 +29,7 @@ jobs:
     - name: Run Playwright tests
       env:
         BASE_URL: ${{ secrets.BASE_URL }}
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
       run: npx playwright test
 
     - uses: actions/upload-artifact@v4
