@@ -17,8 +17,15 @@ jobs:
       run: npm ci
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
+      
     - name: Run Playwright tests
+      # This block injects your GitHub Secrets into the test environment
+      env:
+        BASE_URL: ${{ secrets.BASE_URL }}
+        # Add any other secrets here, for example:
+        # API_KEY: ${{ secrets.API_KEY }}
       run: npx playwright test
+      
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
