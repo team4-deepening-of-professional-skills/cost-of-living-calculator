@@ -13,19 +13,23 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
+
     - name: Install dependencies
       run: npm ci
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-      
-    - name: Run Playwright tests
-      # This block injects your GitHub Secrets into the test environment
+
+    - name: Build Next.js app
       env:
         BASE_URL: ${{ secrets.BASE_URL }}
-        # Add any other secrets here, for example:
-        # API_KEY: ${{ secrets.API_KEY }}
+      run: npm run build
+
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+
+    - name: Run Playwright tests
+      env:
+        BASE_URL: ${{ secrets.BASE_URL }}
       run: npx playwright test
-      
+
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
