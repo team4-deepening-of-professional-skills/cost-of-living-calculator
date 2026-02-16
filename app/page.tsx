@@ -130,6 +130,12 @@ export default function Dashboard() {
     });
   }, [expenses, dateFilter]);
 
+  const detailedListExpenses = useMemo(() => {
+    return [...filteredExpenses].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
+  }, [filteredExpenses]);
+
   const { spendingChartData, incomeChartData } = useMemo(() => {
     const spendingExpenses = filteredExpenses.filter(
       (e) => e.category !== "income",
@@ -412,7 +418,7 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody className="bg-transparent divide-y divide-rp-border">
-                    {filteredExpenses.map((expense, index) => (
+                    {detailedListExpenses.map((expense, index) => (
                       <tr key={index}>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-soft">
                           {expense.merchant}
@@ -420,7 +426,13 @@ export default function Dashboard() {
                             {new Date(expense.date).toLocaleDateString("en-GB")}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-soft font-semibold">
+                        <td
+                          className={`px-6 py-4 whitespace-nowrap text-sm text-right font-semibold ${
+                            expense.category === "income"
+                              ? "text-emerald-400"
+                              : "text-rose-400"
+                          }`}
+                        >
                           € {expense.amount.toFixed(2).replace('.', ',')}
                         </td>
                       </tr>
