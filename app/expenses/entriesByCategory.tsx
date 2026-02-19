@@ -23,7 +23,7 @@ type Props = {
   onDelete: (id: string) => void;
 }
 
-// sort the entries by category (need to add some time limit (like show for 30 days max??))..
+// sort the entries by category. newest 1st. shows / calculates full total of category. divides them into their boxes.
 export default function EntriesByCategory({ entries, onDelete }: Props) {
   return (
     <div className="grid gap-4">

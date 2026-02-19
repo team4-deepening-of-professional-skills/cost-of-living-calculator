@@ -1,9 +1,11 @@
 'use client'
-import { useEffect, useState  } from "react"
+import { useEffect, useState } from "react"
+// get entrylist (all entries) and entries by category (entries categorized) components
 import EntryList from "./entryList"
 import EntriesByCategory from "./entriesByCategory"
+import { useRouter } from "next/navigation";
 
-// categories for using money and getting it in
+// create categories from spending to income (id --> value saved to the mongo database, label is for choosing category)
 const CATEGORIES = [
   { id: "savings", label: "Savings" },
   { id: "housing", label: "Housing" },
@@ -16,7 +18,9 @@ const CATEGORIES = [
 ]
 
 
-// set a type for the entries (id category amount timestamp and recurring inputs(?))
+// set a type for the entries (id category amount timestamp and recurring expenses (like subscriptions))
+// createdAt saves a timestamp automatically to the database
+// recurring is for optional use and everything you have to write / choose
 export type Entry = {
   id: string
   category: string
@@ -28,14 +32,14 @@ export type Entry = {
 }
 
 
-// set the interval for recurring inputs
+// here for choosing if the input is recurring. choose days, weeks or months.
 export type RecurringRule = {
   every: number
   interval: "days" | "weeks" | "months"
 }
 
 
-// financial input section
+// main component for the page.
 export default function FinancialInput() {
 
   const [amount, setAmount] = useState("")
@@ -46,10 +50,10 @@ export default function FinancialInput() {
   const [isRecurring, setIsRecurring] = useState(false)
   const [every, setEvery] = useState(1)
   const [interval, setInterval] = useState<"days" | "weeks" | "months">("months")
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true)
+  const router = useRouter();
 
-
-// load expenses
+// load expenses from database using user id (logged in user)
 useEffect(() => {
   async function loadExpenses() {
     const accountNo = localStorage.getItem("userId");
@@ -72,10 +76,10 @@ useEffect(() => {
   }
 
   loadExpenses();
-}, []);
+}, [])
 
 
-// post entries
+// create / post  a new entry. saves to db. checks all required fields are filled and the user is logged in.
   async function handleAddEntry() {
     if (!amount || !category || !description || !merchant) return
 
@@ -87,12 +91,9 @@ useEffect(() => {
         merchant,
         amount: Number(amount),
         createdAt: Date.now(),
-        ...(isRecurring && {
-          recurring:{
-            every,
-            interval
-          }
-        })
+        recurring: isRecurring
+        ? { every, interval }
+        : undefined
     }
 
 
@@ -135,7 +136,7 @@ useEffect(() => {
     setInterval("months")
   }
 
-  //delete
+  // frontend logic for deleting entries.
   async function handleDeleteEntry(id: string) {
     const accountNo = localStorage.getItem("userId")
     if (!accountNo) return;
@@ -163,9 +164,18 @@ useEffect(() => {
     }
   }
 
-
   return (
-    <div className="space-y-6 max-w-lg"> 
+    <div className="space-y-6 max-w-6xl mx-auto p-6">
+      <div className="flex items-center justify-between">
+        <h1>Expenses</h1>
+
+        <button
+          onClick={() => router.push("/")}
+          className="border px-3 py-1 rounded text-sm hover:bg-gray-100 transition">
+            Back to Dashboard
+        </button>
+      </div>
+
       <div className="space-y-2 border p-4 rounded"> 
 
         {/* Input */} 
@@ -258,15 +268,14 @@ useEffect(() => {
         >
           Save
         </button>
+
       </div>
 
-
-      {/* History / all entries */}
-      <EntryList entries={entries} onDelete={handleDeleteEntry} />
-
-
-      {/* Overview by category*/}
-      <EntriesByCategory entries={entries} onDelete={handleDeleteEntry} />
+      {/* Lists. shows full list of entries and entries divided into categories. */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <EntryList entries={entries} onDelete={handleDeleteEntry} />
+        <EntriesByCategory entries={entries} onDelete={handleDeleteEntry} />
+      </div>
     </div>
   )
 }
