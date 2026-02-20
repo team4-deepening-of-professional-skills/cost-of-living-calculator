@@ -5,7 +5,7 @@ type Props = {
   onDelete: (id: string) => void;
 }
 
-// list of all entries / full history.. (think full bank statement)
+// list of all entries / full history.. (think full bank statement). sorts newest entries first.
 export default function EntryList({ entries, onDelete }: Props){
 
      const sorted = [...entries].sort((a, b) => b.createdAt - a.createdAt)
@@ -25,7 +25,7 @@ export default function EntryList({ entries, onDelete }: Props){
                     className="flex justify-between items-center py-2 border-b last:border-b-0"
                 >
                 <div className="flex flex-col">
-                        {/* amount */}
+                    {/* amount */}
                       <span className="font-semibold">
                         {entry.amount.toFixed(2)} €
                       </span>

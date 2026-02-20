@@ -200,6 +200,15 @@ export default function Dashboard() {
             <h1 className="text-2xl font-semibold text-soft">Dashboard</h1>
             <p className="text-sm text-subtle">Welcome back, {username}</p>
           </div>
+          <div>
+              <Button
+                onClick={() => router.push("/comparison")}
+                variant="ghost"
+                size="sm"
+                className="uppercase tracking-wide border border-rp-border">
+                  Comparison
+              </Button>
+            </div>
           <div className="flex flex-col sm:flex-row items-center gap-4">
             <div className="flex gap-2">
               <Button
